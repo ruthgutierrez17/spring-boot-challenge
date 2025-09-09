@@ -47,8 +47,17 @@ API REST desarrollada con Spring Boot que implementa un sistema de cálculo con 
    ```
 
 2. **Ejecutar la aplicación**
+
+   - Linux / macOS:
+
    ```bash
    ./mvnw spring-boot:run
+   ```
+
+   - Windows (CMD / PowerShell):
+
+   ```bash
+   mvnw spring-boot:run
    ```
 
 ### 🏗️ Arquitectura
