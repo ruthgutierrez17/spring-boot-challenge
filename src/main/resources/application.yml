@@ -1,0 +1,92 @@
+# Configuración principal de la aplicación
+spring:
+  application:
+    name: calculation-api
+
+  # Configuración de base de datos
+  datasource:
+    url: jdbc:postgresql://localhost:5432/challenge_db
+    username: challenge_user
+    password: challenge_pass
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        #format_sql: true
+        format_sql: false
+
+  flyway:
+    enabled: false
+
+  # Configuración de caché
+  cache:
+    type: caffeine
+
+  # Configuración para WebClient
+  webflux:
+    base-path: /
+
+# Configuración del servidor
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+# Configuración de logging
+logging:
+  level:
+    com.challenge: INFO
+    org.springframework.cache: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/application.log
+
+# Configuración del servicio externo
+external-service:
+  percentage-url: http://localhost:9999
+  timeout: 1s
+  retry-attempts: 2
+
+# Configuración de Actuator
+management:
+  server:
+    base-path: /actuator
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,caches
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# Configuración de documentación
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+
+# Configuración de async
+async:
+  core-pool-size: 5
+  max-pool-size: 10
+  queue-capacity: 100
+
+# Configuración de cache personalizada
+cache:
+  expire-after-write: 30m
+  maximum-size: 1

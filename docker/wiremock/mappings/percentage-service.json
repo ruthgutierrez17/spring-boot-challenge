@@ -1,0 +1,63 @@
+{
+  "mappings": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "name": "Percentage Service - Success Response",
+      "request": {
+        "method": "GET",
+        "url": "/percentage"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": "{\"value\": 15.5}",
+        "delayDistribution": {
+          "type": "lognormal",
+          "median": 100,
+          "sigma": 0.1
+        }
+      },
+      "priority": 2
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440001",
+      "name": "Percentage Service - Random Values",
+      "request": {
+        "method": "GET",
+        "url": "/percentage"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": "{\"value\": {{randomInt lower=5 upper=50}} }",
+        "transformers": ["response-template"]
+      },
+      "priority": 1
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440002",
+      "name": "Percentage Service - Error for Testing",
+      "request": {
+        "method": "GET",
+        "url": "/percentage",
+        "headers": {
+          "X-Test-Error": {
+            "equalTo": "true"
+          }
+        }
+      },
+      "response": {
+        "status": 503,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": "{\"error\": \"Service temporarily unavailable\"}"
+      },
+      "priority": 0
+    }
+  ]
+}

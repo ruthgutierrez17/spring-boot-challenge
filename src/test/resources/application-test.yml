@@ -1,0 +1,67 @@
+# Configuración para entorno de testing
+spring:
+  application:
+    name: calculation-api-test
+
+  # Configuración de base de datos para tests (será sobrescrita por TestContainers)
+  datasource:
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  # Deshabilitar Flyway para tests
+  flyway:
+    enabled: false
+
+  # Configuración de caché para tests
+  cache:
+    type: caffeine
+
+# Configuración del servidor para tests
+server:
+  port: 0  # Puerto aleatorio para evitar conflictos
+
+# Configuración de logging para tests
+logging:
+  level:
+    com.challenge: DEBUG
+    org.springframework.cache: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.testcontainers: INFO
+    root: WARN
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# Configuración del servicio externo para tests
+external-service:
+  percentage-url: http://localhost:9999
+  timeout: 3s
+  retry-attempts: 1
+
+# Configuración de Actuator para tests
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,caches
+  endpoint:
+    health:
+      show-details: always
+
+# Configuración de async para tests
+async:
+  core-pool-size: 2
+  max-pool-size: 4
+  queue-capacity: 10
+
+# Configuración de cache personalizada para tests
+cache:
+  expire-after-write: 30m
+  maximum-size: 10

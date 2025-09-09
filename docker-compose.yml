@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  # Base de datos PostgreSQL
+  postgres:
+    image: postgres:16-alpine
+    container_name: challenge-postgres
+    environment:
+      POSTGRES_DB: challenge_db
+      POSTGRES_USER: challenge_user
+      POSTGRES_PASSWORD: challenge_pass
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --locale=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - challenge-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U challenge_user -d challenge_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Mock del servicio externo para porcentajes
+  percentage-service:
+    image: wiremock/wiremock:3.8.0
+    container_name: challenge-percentage-service
+    ports:
+      - "9999:8080"
+    volumes:
+      - ./docker/wiremock:/home/wiremock
+    command: ["--port", "8080", "--verbose"]
+    networks:
+      - challenge-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/__admin/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  # Aplicación Spring Boot
+  calculation-api:
+    image: angel37/spring-boot-challenge-calculation-api:latest
+    #build: .
+    container_name: challenge-api
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/challenge_db
+      SPRING_DATASOURCE_USERNAME: challenge_user
+      SPRING_DATASOURCE_PASSWORD: challenge_pass
+      EXTERNAL_SERVICE_PERCENTAGE_URL: http://percentage-service:8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      percentage-service:
+        condition: service_healthy
+    networks:
+      - challenge-network
+    volumes:
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+    restart: unless-stopped
+
+# Redes
+networks:
+  challenge-network:
+    driver: bridge
+    name: challenge-network
+
+# Volúmenes persistentes
+volumes:
+  postgres_data:
+    name: challenge-postgres-data

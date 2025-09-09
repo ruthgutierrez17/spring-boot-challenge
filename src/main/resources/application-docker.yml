@@ -1,0 +1,95 @@
+# Configuración específica para entorno Docker
+spring:
+  application:
+    name: calculation-api
+
+  # Configuración de base de datos para Docker
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/challenge_db}
+    username: ${SPRING_DATASOURCE_USERNAME:challenge_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:challenge_pass}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+
+  flyway:
+    enabled: false
+
+  # Configuración de caché optimizada para contenedor
+  cache:
+    type: caffeine
+
+# Configuración del servidor para Docker
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 10
+    connection-timeout: 20000
+
+# Configuración de logging para contenedor
+logging:
+  level:
+    com.challenge: INFO
+    org.springframework.cache: WARN
+    org.hibernate.SQL: WARN
+    root: WARN
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: /app/logs/application.log
+
+# Configuración del servicio externo para Docker
+external-service:
+  percentage-url: ${EXTERNAL_SERVICE_PERCENTAGE_URL:http://percentage-service:8080}
+  timeout: 1s
+  retry-attempts: 2
+
+# Configuración de Actuator para Docker
+management:
+  server:
+    base-path: /actuator
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,caches
+  endpoint:
+    health:
+      show-details: always
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# Configuración de async optimizada
+async:
+  core-pool-size: 5
+  max-pool-size: 20
+  queue-capacity: 200
+
+# Configuración de cache personalizada para Docker
+cache:
+  expire-after-write: 30m
+  maximum-size: 1
